@@ -1,9 +1,11 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
     tsconfigPaths: true,
-    alias: { "@app-messages": new URL("./messages/en.json", import.meta.url).pathname },
+    // fileURLToPath decodes %20 etc., so paths with spaces resolve
+    alias: { "@app-messages": fileURLToPath(new URL("./messages/en.json", import.meta.url)) },
   },
   test: {
     environment: "node",
