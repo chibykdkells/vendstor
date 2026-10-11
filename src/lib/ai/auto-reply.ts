@@ -13,6 +13,14 @@ import {
 } from '@/lib/flows/meta-send'
 import { sendTypingIndicator } from '@/lib/whatsapp/meta-api'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { runAgent } from './agent/loop'
+import {
+  COMMERCE_TOOLS,
+  createCommerceToolSession,
+  type CommerceToolSession,
+} from '@/lib/commerce/ai-tools'
+import { loadShopContext, type ShopContext } from '@/lib/commerce/store'
+import type { AiConfig, ChatMessage } from './types'
 
 interface DispatchArgs {
   /** Tenancy key — drives config, contact, and whatsapp_config lookups. */
@@ -130,17 +138,40 @@ export async function dispatchInboundToAiReply(
       latestUserMessage(messages),
     )
 
+    // Shop mode: when the account sells something, the bot gets tools to
+    // search the catalog and create orders (src/lib/commerce/ai-tools).
+    const shop = await loadShopContextSafe(db, accountId)
+    const shopSession: CommerceToolSession | null = shop
+      ? createCommerceToolSession({
+          db,
+          accountId,
+          conversationId,
+          contactId,
+          businessName: shop.businessName,
+          currency: shop.currency,
+        })
+      : null
+
     const systemPrompt = buildSystemPrompt({
       userPrompt: config.systemPrompt,
       mode: 'auto_reply',
       knowledge,
+      commerce: shopSession !== null,
     })
 
-    const { text, handoff, usage } = await generateReply({
-      config,
-      systemPrompt,
-      messages,
-    })
+    const { text, handoff, usage } = shopSession
+      ? await runAgent({
+          config,
+          systemPrompt,
+          messages,
+          tools: COMMERCE_TOOLS,
+          executeTool: (call) => shopSession.execute(call),
+        })
+      : await generateReply({
+          config,
+          systemPrompt,
+          messages,
+        })
 
     // Record token spend on the account's BYO key. Fire-and-forget so it
     // never adds latency to the customer-facing send: `logAiUsage`
@@ -156,28 +187,15 @@ export async function dispatchInboundToAiReply(
       usage,
     })
 
-    if (handoff || !text) {
-      // The model can't (or shouldn't) answer — stop auto-replying on
-      // this thread and hand it to a human. We (a) pause the bot here
-      // (sticky until re-enabled), (b) route the conversation to the
-      // configured handoff agent — null leaves it in the shared queue —
-      // and (c) leave a short internal note so whoever picks it up has
-      // context. Assigning fires the `on_conversation_assigned` trigger,
-      // which notifies the agent.
-      const summary = buildHandoffSummary({
-        messages,
-        replyCount: conv.ai_reply_count ?? 0,
-      })
-      const update: Record<string, unknown> = {
-        ai_autoreply_disabled: true,
-        ai_handoff_summary: summary,
-      }
-      // Only set the assignee when a target is configured AND the thread
-      // isn't already owned — never stomp an existing human assignment.
-      if (config.handoffAgentId && !conv.assigned_agent_id) {
-        update.assigned_agent_id = config.handoffAgentId
-      }
-      await db.from('conversations').update(update).eq('id', conversationId)
+    // Shop messages queued by a tool (invoice, bank details). Once an
+    // order exists these must reach the customer even if the model then
+    // handed off, so they're sent before any handoff below.
+    const outbox = shopSession?.outbox ?? []
+    // Order created but no bank details configured → a human finishes.
+    const handOff = handoff || !text || (shopSession?.needsHuman ?? false)
+
+    if (handOff && outbox.length === 0) {
+      await handOffConversation(db, { conversationId, config, conv, messages })
       return
     }
 
@@ -201,18 +219,82 @@ export async function dispatchInboundToAiReply(
       console.error('[ai auto-reply] claim_ai_reply_slot failed:', claimErr)
       return
     }
-    if (claimed !== true) return // lost the per-conversation cap race
+    const send = (body: string) =>
+      engineSendText({
+        accountId,
+        userId: configOwnerUserId,
+        conversationId,
+        contactId,
+        text: body,
+        aiGenerated: true,
+      })
+    // Lost the per-conversation cap race: skip the AI's chatter — but an
+    // order already exists, so its invoice and bank details still go
+    // out (the cap bounds bot replies, not the customer's own order).
+    const replyAllowed = claimed === true
+    if (!replyAllowed && outbox.length === 0) return
 
-    await engineSendText({
-      accountId,
-      userId: configOwnerUserId,
-      conversationId,
-      contactId,
-      text,
-      aiGenerated: true,
-    })
+    // The AI's own words first, then the invoice and bank details, in
+    // order — sequential so WhatsApp delivers them in that order.
+    if (replyAllowed && text && !handoff) await send(text)
+    for (const body of outbox) await send(body)
+
+    if (handOff) {
+      await handOffConversation(db, { conversationId, config, conv, messages })
+    }
   } catch (err) {
     console.error('[ai auto-reply] dispatch failed:', err)
+  }
+}
+
+/**
+ * The model can't (or shouldn't) answer — stop auto-replying on this
+ * thread and hand it to a human. We (a) pause the bot here (sticky until
+ * re-enabled), (b) route the conversation to the configured handoff
+ * agent — null leaves it in the shared queue — and (c) leave a short
+ * internal note so whoever picks it up has context. Assigning fires the
+ * `on_conversation_assigned` trigger, which notifies the agent.
+ */
+async function handOffConversation(
+  db: ReturnType<typeof supabaseAdmin>,
+  args: {
+    conversationId: string
+    config: AiConfig
+    conv: { assigned_agent_id: string | null; ai_reply_count: number | null }
+    messages: ChatMessage[]
+  },
+): Promise<void> {
+  const { conversationId, config, conv, messages } = args
+  const summary = buildHandoffSummary({
+    messages,
+    replyCount: conv.ai_reply_count ?? 0,
+  })
+  const update: Record<string, unknown> = {
+    ai_autoreply_disabled: true,
+    ai_handoff_summary: summary,
+  }
+  // Only set the assignee when a target is configured AND the thread
+  // isn't already owned — never stomp an existing human assignment.
+  if (config.handoffAgentId && !conv.assigned_agent_id) {
+    update.assigned_agent_id = config.handoffAgentId
+  }
+  await db.from('conversations').update(update).eq('id', conversationId)
+}
+
+/**
+ * Shop context for the tool-calling bot, or null. Best-effort like
+ * knowledge retrieval: if the catalog lookup fails, the bot still
+ * answers — just without shop tools — rather than going silent.
+ */
+async function loadShopContextSafe(
+  db: ReturnType<typeof supabaseAdmin>,
+  accountId: string,
+): Promise<ShopContext | null> {
+  try {
+    return await loadShopContext(db, accountId)
+  } catch (err) {
+    console.warn('[ai auto-reply] shop context unavailable (continuing without tools):', err)
+    return null
   }
 }
 

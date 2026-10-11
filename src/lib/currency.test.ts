@@ -4,6 +4,7 @@ import {
   DEFAULT_CURRENCY,
   formatCurrency,
   formatCurrencyShort,
+  formatPrice,
 } from "./currency";
 
 describe("formatCurrency", () => {
@@ -44,6 +45,27 @@ describe("formatCurrency", () => {
     for (const c of CURRENCIES) {
       expect(() => formatCurrency(1000, c.code)).not.toThrow();
     }
+  });
+});
+
+describe("formatPrice", () => {
+  it("omits minor units for whole amounts", () => {
+    const out = formatPrice(1500, "NGN");
+    expect(out).toContain("1,500");
+    expect(out).not.toContain(".");
+  });
+
+  it("keeps two minor-unit digits when the amount has a fraction", () => {
+    expect(formatPrice(1500.5, "NGN")).toContain("1,500.50");
+  });
+
+  it("parses numeric strings (Postgres numeric arrives as a string)", () => {
+    expect(formatPrice(Number("16500.50"), "NGN")).toContain("16,500.50");
+  });
+
+  it("never throws on a structurally invalid code", () => {
+    expect(() => formatPrice(10.25, "naira")).not.toThrow();
+    expect(formatPrice(10.25, "naira")).toContain("10.25");
   });
 });
 

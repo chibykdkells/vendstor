@@ -89,10 +89,14 @@ interface OpenAiCompatibleResponse {
   }
 }
 
-export async function generateOpenAiCompatible(
-  args: ProviderArgs,
-): Promise<ProviderResult> {
-  const { apiKey, model, systemPrompt, messages, timeoutMs, baseUrl } = args
+/**
+ * Normalize the configured base URL to its chat-completions endpoint and
+ * refuse private/internal targets (SSRF guard). Shared by the plain reply
+ * path below and the tool-calling agent (src/lib/ai/agent).
+ */
+export async function resolveOpenAiCompatibleEndpoint(
+  baseUrl: string | null | undefined,
+): Promise<string> {
   const endpoint = normalizeOpenAiCompatibleBaseUrl(baseUrl ?? '')
 
   let deliverable = false
@@ -110,6 +114,14 @@ export async function generateOpenAiCompatible(
       status: 400,
     })
   }
+  return endpoint
+}
+
+export async function generateOpenAiCompatible(
+  args: ProviderArgs,
+): Promise<ProviderResult> {
+  const { apiKey, model, systemPrompt, messages, timeoutMs, baseUrl } = args
+  const endpoint = await resolveOpenAiCompatibleEndpoint(baseUrl)
 
   let res: Response
   try {

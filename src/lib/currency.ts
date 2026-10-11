@@ -85,6 +85,34 @@ export function formatCurrency(
 }
 
 /**
+ * Format a product/order amount. Unlike {@link formatCurrency} (whole
+ * units — deal values), prices and invoices keep minor units when
+ * there are any: 1500 → "₦1,500", 1500.5 → "₦1,500.50". Same
+ * invalid-code fallback.
+ */
+export function formatPrice(
+  value: number,
+  currency: string = DEFAULT_CURRENCY,
+): string {
+  const code = (currency || DEFAULT_CURRENCY).trim();
+  const amount = Number(value) || 0;
+  const fractionDigits = Number.isInteger(amount) ? 0 : 2;
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: code,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(amount);
+  } catch {
+    return `${code} ${new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(amount)}`;
+  }
+}
+
+/**
  * Compact currency for tight spaces (donut center, legend rows):
  * "$1.2M" / "€34.5k" / "₹900". Uses the currency's symbol from
  * CURRENCIES, falling back to the code when we don't carry a symbol.

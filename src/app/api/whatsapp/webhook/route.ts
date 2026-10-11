@@ -17,6 +17,11 @@ import { verifyMetaWebhookSignature } from '@/lib/whatsapp/webhook-signature'
 import { resumeAwaitingReply, runAutomationsForTrigger } from '@/lib/automations/engine'
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
 import { dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
+import {
+  handleInboundPaymentProof,
+  handleReceiptReply,
+  isReceiptReply,
+} from '@/lib/commerce/payment-proof'
 import { dispatchWebhookEvent } from '@/lib/webhooks/deliver'
 import {
   handleTemplateWebhookChange,
@@ -990,6 +995,32 @@ async function processMessage(
       // Lets the bot show "typing…" (and mark the message read) while
       // the reply is generated.
       inboundMessageId: message.id,
+    })
+  }
+
+  // Bank-transfer receipts (src/lib/commerce/payment-proof.ts). While an
+  // order awaits payment, a document is taken as the receipt and an image
+  // prompts "Is this your payment receipt?" buttons; the tap comes back
+  // here as an interactive reply. No-ops without an open order; never throw.
+  if (!contentConsumed && (contentType === 'image' || contentType === 'document')) {
+    await handleInboundPaymentProof({
+      db: supabaseAdmin(),
+      accountId,
+      conversationId: conversation.id,
+      contactId: contactRecord.id,
+      configOwnerUserId,
+      messageId: insertedRows[0].id,
+      contentType,
+    })
+  }
+  if (!contentConsumed && isReceiptReply(interactiveReplyId)) {
+    await handleReceiptReply({
+      db: supabaseAdmin(),
+      accountId,
+      conversationId: conversation.id,
+      contactId: contactRecord.id,
+      configOwnerUserId,
+      replyId: interactiveReplyId!,
     })
   }
 

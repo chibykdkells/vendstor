@@ -55,8 +55,11 @@ export function buildSystemPrompt(args: {
   mode: 'draft' | 'auto_reply'
   /** Knowledge-base excerpts retrieved for the current question. */
   knowledge?: string[]
+  /** The shop tools (src/lib/commerce/ai-tools) are available — auto-reply
+   *  only, when the account has an active catalog. */
+  commerce?: boolean
 }): string {
-  const { userPrompt, mode, knowledge } = args
+  const { userPrompt, mode, knowledge, commerce = false } = args
   const parts: string[] = [
     'You are a customer-messaging assistant for a business that uses a WhatsApp CRM. ' +
       'You are shown the recent WhatsApp conversation between the business (assistant) and a customer (user). ' +
@@ -73,6 +76,16 @@ export function buildSystemPrompt(args: {
     )
   }
 
+  if (commerce && mode === 'auto_reply') {
+    parts.push(
+      'You also sell for this business, using tools. Write like a friendly, attentive shop assistant: warm and natural, in short WhatsApp-sized messages. ' +
+        'Use search_products for every question about products, prices or availability, and never state a product, price or stock level that a tool did not return. ' +
+        'Guide the customer toward buying: understand what they need, recommend matching products, answer their questions, and confirm the exact items and quantities before ordering. ' +
+        'Call create_order only after the customer has clearly confirmed what they want to buy. The invoice and bank transfer details are then sent automatically right after your message, so do not repeat the account number, the invoice lines or the total yourself. ' +
+        'Payment is by bank transfer only: ask the customer to send a screenshot of the receipt after paying. You cannot confirm a payment yourself — a team member checks the bank. Use get_order_status when they ask about an existing order.',
+    )
+  }
+
   if (userPrompt && userPrompt.trim()) {
     parts.push(`Business context and instructions:\n${userPrompt.trim()}`)
   }
@@ -80,7 +93,10 @@ export function buildSystemPrompt(args: {
   if (knowledge && knowledge.length > 0) {
     const fallback =
       mode === 'auto_reply'
-        ? `if they don't cover the question, do not guess — reply with exactly ${HANDOFF_SENTINEL} so a human can help`
+        ? `if they don't cover the question, do not guess — reply with exactly ${HANDOFF_SENTINEL} so a human can help` +
+          (commerce
+            ? ' (product, price and stock questions are answered with the shop tools, not these excerpts)'
+            : '')
         : "if they don't cover the question, don't guess — say you'll check and follow up"
     parts.push(
       'Knowledge base — excerpts from the business\'s own documentation, retrieved for this question. ' +

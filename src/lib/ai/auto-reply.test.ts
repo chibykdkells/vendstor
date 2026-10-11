@@ -10,6 +10,13 @@ const h = vi.hoisted(() => ({
   engineSendText: vi.fn(),
   loadAccountMetaCredentials: vi.fn(),
   sendTypingIndicator: vi.fn(),
+  loadShopContext: vi.fn(),
+  runAgent: vi.fn(),
+  shopSession: {
+    execute: vi.fn(),
+    outbox: [] as string[],
+    needsHuman: false,
+  },
   state: {
     conv: null as Record<string, unknown> | null,
     autoResponders: [] as { id: string }[],
@@ -29,6 +36,12 @@ vi.mock('@/lib/flows/meta-send', () => ({
 }))
 vi.mock('@/lib/whatsapp/meta-api', () => ({
   sendTypingIndicator: h.sendTypingIndicator,
+}))
+vi.mock('@/lib/commerce/store', () => ({ loadShopContext: h.loadShopContext }))
+vi.mock('./agent/loop', () => ({ runAgent: h.runAgent }))
+vi.mock('@/lib/commerce/ai-tools', () => ({
+  COMMERCE_TOOLS: [{ name: 'search_products', description: '', parameters: {} }],
+  createCommerceToolSession: () => h.shopSession,
 }))
 vi.mock('./admin-client', () => ({
   supabaseAdmin: () => ({
@@ -111,6 +124,88 @@ beforeEach(() => {
     accessToken: 'tok',
   })
   h.sendTypingIndicator.mockResolvedValue(undefined)
+  h.loadShopContext.mockResolvedValue(null) // no catalog → plain replies
+  h.runAgent.mockReset()
+  h.shopSession.outbox = []
+  h.shopSession.needsHuman = false
+})
+
+describe('dispatchInboundToAiReply — shop mode', () => {
+  const SHOP = { businessName: 'Ada Stores', currency: 'NGN' }
+  const sentTexts = () => h.engineSendText.mock.calls.map((c) => c[0].text)
+
+  it('uses plain replies (no tools) when the account has no catalog', async () => {
+    await dispatchInboundToAiReply(ARGS)
+    expect(h.runAgent).not.toHaveBeenCalled()
+    expect(h.generateReply).toHaveBeenCalled()
+    const prompt = h.generateReply.mock.calls[0][0].systemPrompt as string
+    expect(prompt).not.toContain('search_products')
+  })
+
+  it('runs the tool agent with shop instructions when there is a catalog', async () => {
+    h.loadShopContext.mockResolvedValue(SHOP)
+    h.runAgent.mockResolvedValue({ text: 'We have it!', handoff: false, usage: null })
+    await dispatchInboundToAiReply(ARGS)
+    expect(h.generateReply).not.toHaveBeenCalled()
+    const agentArgs = h.runAgent.mock.calls[0][0]
+    expect(agentArgs.tools).toHaveLength(1)
+    expect(agentArgs.systemPrompt).toContain('search_products')
+    expect(sentTexts()).toEqual(['We have it!'])
+  })
+
+  it('sends the reply, then the invoice, then the bank details, in order', async () => {
+    h.loadShopContext.mockResolvedValue(SHOP)
+    h.shopSession.outbox = ['*Invoice INV-0001*', 'To pay, please transfer…']
+    h.runAgent.mockResolvedValue({ text: 'Done! 🎉', handoff: false, usage: null })
+    await dispatchInboundToAiReply(ARGS)
+    expect(sentTexts()).toEqual(['Done! 🎉', '*Invoice INV-0001*', 'To pay, please transfer…'])
+    expect(h.state.updatePayload).toBeNull() // no handoff
+  })
+
+  it('still sends the invoice, then hands off, when bank details are missing', async () => {
+    h.loadShopContext.mockResolvedValue(SHOP)
+    h.shopSession.outbox = ['*Invoice INV-0001*']
+    h.shopSession.needsHuman = true
+    h.runAgent.mockResolvedValue({ text: 'A teammate will send payment details.', handoff: false, usage: null })
+    await dispatchInboundToAiReply(ARGS)
+    expect(sentTexts()).toEqual(['A teammate will send payment details.', '*Invoice INV-0001*'])
+    expect(h.state.updatePayload).toMatchObject({ ai_autoreply_disabled: true })
+  })
+
+  it('delivers queued order messages even when the model hands off', async () => {
+    h.loadShopContext.mockResolvedValue(SHOP)
+    h.shopSession.outbox = ['*Invoice INV-0001*']
+    h.runAgent.mockResolvedValue({ text: '', handoff: true, usage: null })
+    await dispatchInboundToAiReply(ARGS)
+    expect(sentTexts()).toEqual(['*Invoice INV-0001*'])
+    expect(h.state.updatePayload).toMatchObject({ ai_autoreply_disabled: true })
+  })
+
+  it('still delivers the order messages (but not the AI chatter) when the cap race is lost', async () => {
+    h.loadShopContext.mockResolvedValue(SHOP)
+    h.shopSession.outbox = ['*Invoice INV-0001*', 'Bank details']
+    h.runAgent.mockResolvedValue({ text: 'Done!', handoff: false, usage: null })
+    h.state.claim = false
+    await dispatchInboundToAiReply(ARGS)
+    expect(sentTexts()).toEqual(['*Invoice INV-0001*', 'Bank details'])
+  })
+
+  it('sends nothing when the cap race is lost and no order was created', async () => {
+    h.loadShopContext.mockResolvedValue(SHOP)
+    h.runAgent.mockResolvedValue({ text: 'Hi!', handoff: false, usage: null })
+    h.state.claim = false
+    await dispatchInboundToAiReply(ARGS)
+    expect(h.engineSendText).not.toHaveBeenCalled()
+  })
+
+  it('falls back to a plain reply if the catalog lookup fails', async () => {
+    h.loadShopContext.mockRejectedValue(new Error('db down'))
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await dispatchInboundToAiReply(ARGS)
+    expect(h.runAgent).not.toHaveBeenCalled()
+    expect(sentTexts()).toEqual(['Hello!'])
+    warn.mockRestore()
+  })
 })
 
 describe('dispatchInboundToAiReply — eligibility gates', () => {
