@@ -41,7 +41,9 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Perfil",
     "menuSettings": "Configurações",
-    "menuSignOut": "Sair"
+    "menuSignOut": "Sair",
+    "orders": "Pedidos",
+    "products": "Produtos"
   },
   "Header": {
     "dashboard": "Painel",
@@ -58,7 +60,9 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Perfil",
     "menuSettings": "Configurações",
-    "menuSignOut": "Sair"
+    "menuSignOut": "Sair",
+    "orders": "Pedidos",
+    "products": "Produtos"
   },
   "ModeToggle": {
     "switchMode": "Mudar para o modo {mode}"
@@ -1783,7 +1787,8 @@
       "fields": "Campos e tags",
       "deals": "Negócios e moeda",
       "members": "Membros da equipe",
-      "api": "Chaves de API"
+      "api": "Chaves de API",
+      "payments": "Pagamentos"
     },
     "groups": {
       "account": "Conta",
@@ -2024,6 +2029,23 @@
       "textPlaceholder": "O texto da mensagem a inserir",
       "cancel": "Cancelar",
       "save": "Salvar"
+    },
+    "payments": {
+      "title": "Pagamentos",
+      "description": "Dados bancários que a IA envia aos clientes depois de criar um pedido. Os clientes pagam por transferência e enviam o comprovante; você confirma o pagamento na página Pedidos.",
+      "readOnly": "Apenas administradores e proprietários podem alterar as configurações de pagamento.",
+      "bankName": "Nome do banco",
+      "accountName": "Titular da conta",
+      "accountNumber": "Número da conta",
+      "instructions": "Instruções extras de pagamento (opcional)",
+      "instructionsPlaceholder": "ex.: Use seu nome na descrição da transferência.",
+      "prefix": "Prefixo do número da fatura",
+      "prefixHint": "Até 12 letras, números ou hífens. Novos pedidos são numerados como INV-0001.",
+      "save": "Salvar",
+      "saved": "Configurações de pagamento salvas",
+      "saveError": "Não foi possível salvar as configurações de pagamento",
+      "previewTitle": "O que os clientes recebem",
+      "previewIncomplete": "Preencha o nome do banco, o titular e o número da conta. Até lá, os pedidos são repassados a uma pessoa para enviar os dados de pagamento."
     }
   },
   "SignupPage": {
@@ -2714,6 +2736,99 @@
       "submitFailed": "Falha ao enviar o modelo.",
       "metaApiStatus": "Erro da API da Meta: {status}",
       "syncFailed": "Falha ao sincronizar os modelos"
+    },
+    "commerce": {
+      "invalidBody": "Corpo da requisição inválido",
+      "nameRequired": "O nome do produto é obrigatório",
+      "invalidPrice": "O preço deve ser um número maior ou igual a 0, com no máximo 2 casas decimais",
+      "invalidStock": "O estoque deve ser um número inteiro maior ou igual a 0, ou ficar em branco",
+      "nothingToUpdate": "Nada para atualizar",
+      "invalidAccountNumber": "O número da conta só pode conter letras, números, espaços e hífens",
+      "invalidPrefix": "O prefixo da fatura pode ter até 12 letras, números ou hífens",
+      "skuTaken": "Outro produto já usa este SKU",
+      "productNotFound": "Produto não encontrado",
+      "orderNotFound": "Pedido não encontrado",
+      "invalidAction": "Ação de pedido desconhecida",
+      "orderStatusConflict": "Este pedido não pode ser alterado no status atual. Atualize e tente novamente.",
+      "invalidStatusFilter": "Filtro de status desconhecido"
+    }
+  },
+  "Commerce": {
+    "products": {
+      "title": "Produtos",
+      "description": "Seu catálogo. A IA só oferece produtos ativos, com exatamente estes preços e estoques.",
+      "new": "Novo produto",
+      "edit": "Editar produto",
+      "delete": "Excluir produto",
+      "hidden": "Oculto",
+      "empty": "Nenhum produto ainda. Adicione um para a IA começar a vender.",
+      "loadError": "Não foi possível carregar os produtos",
+      "nameRequired": "O nome é obrigatório",
+      "saveError": "Não foi possível salvar o produto",
+      "created": "Produto adicionado",
+      "updated": "Produto atualizado",
+      "deleteConfirm": "Excluir \"{name}\"? Pedidos anteriores mantêm seus dados.",
+      "deleteError": "Não foi possível excluir o produto",
+      "activeLabel": "Disponível para venda",
+      "activeHint": "Produtos ocultos nunca são oferecidos pela IA.",
+      "nameLabel": "Nome",
+      "namePlaceholder": "ex.: Sapatos Ankara",
+      "descriptionLabel": "Descrição",
+      "descriptionHint": "A IA usa isto para responder perguntas e recomendar produtos.",
+      "priceLabel": "Preço ({currency})",
+      "stockLabel": "Estoque",
+      "stockHint": "Deixe em branco se você não controla o estoque.",
+      "skuLabel": "SKU (opcional)",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "stockUntracked": "Estoque não controlado",
+      "outOfStock": "Sem estoque",
+      "inStock": "{count} em estoque"
+    },
+    "orders": {
+      "title": "Pedidos",
+      "description": "Pedidos criados no chat. Verifique sua conta bancária e marque os pedidos como pagos aqui — o pagamento nunca é confirmado automaticamente.",
+      "filterLabel": "Filtrar pedidos",
+      "filters": {
+        "open": "Requer atenção",
+        "paid": "Pagos",
+        "fulfilled": "Concluídos",
+        "cancelled": "Cancelados",
+        "all": "Todos"
+      },
+      "empty": {
+        "open": "Nada aguardando pagamento.",
+        "paid": "Nenhum pedido pago aguardando conclusão.",
+        "fulfilled": "Nenhum pedido concluído ainda.",
+        "cancelled": "Nenhum pedido cancelado.",
+        "all": "Nenhum pedido ainda."
+      },
+      "loadError": "Não foi possível carregar os pedidos",
+      "actionError": "Não foi possível atualizar o pedido",
+      "confirmMarkPaid": "Confirma que recebeu {total} na sua conta bancária referente a {number}?",
+      "confirmCancel": "Cancelar o pedido {number}?",
+      "done": {
+        "mark_paid": "{number} marcado como pago",
+        "fulfill": "{number} marcado como concluído",
+        "cancel": "{number} cancelado"
+      },
+      "byAi": "Criado pela IA",
+      "receiptReceived": "Comprovante recebido",
+      "unknownCustomer": "Cliente desconhecido",
+      "openChat": "Abrir chat",
+      "receiptHint": "O cliente enviou um comprovante de pagamento. Abra o chat para vê-lo, verifique sua conta bancária e marque o pedido como pago.",
+      "total": "Total",
+      "note": "Observação do cliente",
+      "cancelOrder": "Cancelar pedido",
+      "markPaid": "Marcar como pago",
+      "markFulfilled": "Marcar como concluído"
+    },
+    "status": {
+      "pending_payment": "Aguardando pagamento",
+      "payment_submitted": "Comprovante recebido",
+      "paid": "Pago",
+      "fulfilled": "Concluído",
+      "cancelled": "Cancelado"
     }
   }
 }

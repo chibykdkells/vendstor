@@ -41,7 +41,9 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Perfil",
     "menuSettings": "Configuración",
-    "menuSignOut": "Cerrar sesión"
+    "menuSignOut": "Cerrar sesión",
+    "orders": "Pedidos",
+    "products": "Productos"
   },
   "Header": {
     "dashboard": "Panel",
@@ -58,7 +60,9 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Perfil",
     "menuSettings": "Configuración",
-    "menuSignOut": "Cerrar sesión"
+    "menuSignOut": "Cerrar sesión",
+    "orders": "Pedidos",
+    "products": "Productos"
   },
   "ModeToggle": {
     "switchMode": "Cambiar al modo {mode}"
@@ -1783,7 +1787,8 @@
       "fields": "Campos y etiquetas",
       "deals": "Negocios y moneda",
       "members": "Miembros del equipo",
-      "api": "Claves de API"
+      "api": "Claves de API",
+      "payments": "Pagos"
     },
     "groups": {
       "account": "Cuenta",
@@ -2024,6 +2029,23 @@
       "textPlaceholder": "El texto del mensaje que se insertará",
       "cancel": "Cancelar",
       "save": "Guardar"
+    },
+    "payments": {
+      "title": "Pagos",
+      "description": "Datos bancarios que la IA envía a los clientes después de crear un pedido. Los clientes pagan por transferencia y envían el comprobante; tú confirmas el pago en la página Pedidos.",
+      "readOnly": "Solo los administradores y propietarios pueden cambiar la configuración de pagos.",
+      "bankName": "Nombre del banco",
+      "accountName": "Titular de la cuenta",
+      "accountNumber": "Número de cuenta",
+      "instructions": "Instrucciones de pago adicionales (opcional)",
+      "instructionsPlaceholder": "p. ej.: Usa tu nombre como concepto de la transferencia.",
+      "prefix": "Prefijo del número de factura",
+      "prefixHint": "Hasta 12 letras, números o guiones. Los pedidos nuevos se numeran como INV-0001.",
+      "save": "Guardar",
+      "saved": "Configuración de pagos guardada",
+      "saveError": "No se pudo guardar la configuración de pagos",
+      "previewTitle": "Lo que reciben los clientes",
+      "previewIncomplete": "Completa el nombre del banco, el titular y el número de cuenta. Mientras tanto, los pedidos se pasan a una persona para enviar los datos de pago."
     }
   },
   "SignupPage": {
@@ -2714,6 +2736,99 @@
       "submitFailed": "Error al enviar la plantilla.",
       "metaApiStatus": "Error de la API de Meta: {status}",
       "syncFailed": "Error al sincronizar las plantillas"
+    },
+    "commerce": {
+      "invalidBody": "Cuerpo de la solicitud no válido",
+      "nameRequired": "El nombre del producto es obligatorio",
+      "invalidPrice": "El precio debe ser un número mayor o igual a 0, con 2 decimales como máximo",
+      "invalidStock": "Las existencias deben ser un número entero mayor o igual a 0, o quedar en blanco",
+      "nothingToUpdate": "Nada que actualizar",
+      "invalidAccountNumber": "El número de cuenta solo puede contener letras, números, espacios y guiones",
+      "invalidPrefix": "El prefijo de factura puede tener hasta 12 letras, números o guiones",
+      "skuTaken": "Otro producto ya usa este SKU",
+      "productNotFound": "Producto no encontrado",
+      "orderNotFound": "Pedido no encontrado",
+      "invalidAction": "Acción de pedido desconocida",
+      "orderStatusConflict": "Este pedido no se puede cambiar desde su estado actual. Actualiza e inténtalo de nuevo.",
+      "invalidStatusFilter": "Filtro de estado desconocido"
+    }
+  },
+  "Commerce": {
+    "products": {
+      "title": "Productos",
+      "description": "Tu catálogo. La IA solo ofrece productos activos, con exactamente estos precios y existencias.",
+      "new": "Nuevo producto",
+      "edit": "Editar producto",
+      "delete": "Eliminar producto",
+      "hidden": "Oculto",
+      "empty": "Aún no hay productos. Agrega uno para que la IA empiece a vender.",
+      "loadError": "No se pudieron cargar los productos",
+      "nameRequired": "El nombre es obligatorio",
+      "saveError": "No se pudo guardar el producto",
+      "created": "Producto agregado",
+      "updated": "Producto actualizado",
+      "deleteConfirm": "¿Eliminar \"{name}\"? Los pedidos anteriores conservan sus datos.",
+      "deleteError": "No se pudo eliminar el producto",
+      "activeLabel": "Disponible para la venta",
+      "activeHint": "La IA nunca ofrece productos ocultos.",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "p. ej.: Zapatos Ankara",
+      "descriptionLabel": "Descripción",
+      "descriptionHint": "La IA lo usa para responder preguntas y recomendar productos.",
+      "priceLabel": "Precio ({currency})",
+      "stockLabel": "Existencias",
+      "stockHint": "Déjalo en blanco si no controlas las existencias.",
+      "skuLabel": "SKU (opcional)",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "stockUntracked": "Existencias no controladas",
+      "outOfStock": "Agotado",
+      "inStock": "{count} en existencia"
+    },
+    "orders": {
+      "title": "Pedidos",
+      "description": "Pedidos creados en el chat. Revisa tu cuenta bancaria y marca aquí los pedidos como pagados: el pago nunca se confirma automáticamente.",
+      "filterLabel": "Filtrar pedidos",
+      "filters": {
+        "open": "Requiere atención",
+        "paid": "Pagados",
+        "fulfilled": "Completados",
+        "cancelled": "Cancelados",
+        "all": "Todos"
+      },
+      "empty": {
+        "open": "Nada pendiente de pago.",
+        "paid": "No hay pedidos pagados pendientes de completar.",
+        "fulfilled": "Aún no hay pedidos completados.",
+        "cancelled": "No hay pedidos cancelados.",
+        "all": "Aún no hay pedidos."
+      },
+      "loadError": "No se pudieron cargar los pedidos",
+      "actionError": "No se pudo actualizar el pedido",
+      "confirmMarkPaid": "¿Confirmas que recibiste {total} en tu cuenta bancaria por {number}?",
+      "confirmCancel": "¿Cancelar el pedido {number}?",
+      "done": {
+        "mark_paid": "{number} marcado como pagado",
+        "fulfill": "{number} marcado como completado",
+        "cancel": "{number} cancelado"
+      },
+      "byAi": "Creado por la IA",
+      "receiptReceived": "Comprobante recibido",
+      "unknownCustomer": "Cliente desconocido",
+      "openChat": "Abrir chat",
+      "receiptHint": "El cliente envió un comprobante de pago. Abre el chat para verlo, revisa tu cuenta bancaria y marca el pedido como pagado.",
+      "total": "Total",
+      "note": "Nota del cliente",
+      "cancelOrder": "Cancelar pedido",
+      "markPaid": "Marcar como pagado",
+      "markFulfilled": "Marcar como completado"
+    },
+    "status": {
+      "pending_payment": "Pendiente de pago",
+      "payment_submitted": "Comprobante recibido",
+      "paid": "Pagado",
+      "fulfilled": "Completado",
+      "cancelled": "Cancelado"
     }
   }
 }

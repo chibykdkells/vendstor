@@ -24,6 +24,13 @@ const ORDER_COLUMNS =
   'conversation_id, created_at, ' +
   'items:order_items(product_id, product_name, unit_price, quantity, line_total)';
 
+/** Owner-screen order shape: adds the contact and payment fields. */
+export const ORDER_LIST_COLUMNS =
+  'id, order_number, status, source, currency, total, customer_note, ' +
+  'conversation_id, payment_proof_message_id, paid_at, created_at, ' +
+  'contact:contacts(id, name, phone), ' +
+  'items:order_items(product_name, unit_price, quantity, line_total)';
+
 const MAX_SEARCH_TERM = 60;
 
 /**

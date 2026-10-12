@@ -41,7 +41,9 @@
     "defaultAvatar": "아바타",
     "menuProfile": "프로필",
     "menuSettings": "설정",
-    "menuSignOut": "로그아웃"
+    "menuSignOut": "로그아웃",
+    "orders": "주문",
+    "products": "상품"
   },
   "Header": {
     "dashboard": "대시보드",
@@ -58,7 +60,9 @@
     "defaultAvatar": "아바타",
     "menuProfile": "프로필",
     "menuSettings": "설정",
-    "menuSignOut": "로그아웃"
+    "menuSignOut": "로그아웃",
+    "orders": "주문",
+    "products": "상품"
   },
   "ModeToggle": {
     "switchMode": "{mode} 모드로 전환"
@@ -1783,7 +1787,8 @@
       "fields": "필드 & 태그",
       "deals": "딜 & 통화",
       "members": "팀원",
-      "api": "API 키"
+      "api": "API 키",
+      "payments": "결제"
     },
     "groups": {
       "account": "계정",
@@ -2024,6 +2029,23 @@
       "textPlaceholder": "삽입할 메시지 텍스트",
       "cancel": "취소",
       "save": "저장"
+    },
+    "payments": {
+      "title": "결제",
+      "description": "AI가 주문을 생성한 후 고객에게 보내는 계좌 정보입니다. 고객은 계좌이체로 결제하고 영수증을 보내며, 주문 페이지에서 결제를 확인합니다.",
+      "readOnly": "결제 설정은 관리자와 소유자만 변경할 수 있습니다.",
+      "bankName": "은행명",
+      "accountName": "예금주",
+      "accountNumber": "계좌번호",
+      "instructions": "추가 결제 안내 (선택)",
+      "instructionsPlaceholder": "예: 입금자명에 성함을 입력해 주세요.",
+      "prefix": "송장 번호 접두사",
+      "prefixHint": "영문, 숫자, 하이픈 최대 12자. 새 주문은 INV-0001 형식으로 번호가 매겨집니다.",
+      "save": "저장",
+      "saved": "결제 설정이 저장되었습니다",
+      "saveError": "결제 설정을 저장하지 못했습니다",
+      "previewTitle": "고객이 받는 메시지",
+      "previewIncomplete": "은행명, 예금주, 계좌번호를 입력하세요. 그 전까지 주문은 담당자에게 넘어가 결제 정보를 보내게 됩니다."
     }
   },
   "SignupPage": {
@@ -2714,6 +2736,99 @@
       "submitFailed": "템플릿을 제출하지 못했습니다.",
       "metaApiStatus": "Meta API 오류: {status}",
       "syncFailed": "템플릿을 동기화하지 못했습니다"
+    },
+    "commerce": {
+      "invalidBody": "잘못된 요청 본문입니다",
+      "nameRequired": "상품 이름은 필수입니다",
+      "invalidPrice": "가격은 0 이상의 숫자여야 하며 소수점은 최대 2자리입니다",
+      "invalidStock": "재고는 0 이상의 정수이거나 비워 두어야 합니다",
+      "nothingToUpdate": "업데이트할 내용이 없습니다",
+      "invalidAccountNumber": "계좌번호에는 영문, 숫자, 공백, 하이픈만 사용할 수 있습니다",
+      "invalidPrefix": "송장 접두사는 영문, 숫자, 하이픈 최대 12자입니다",
+      "skuTaken": "다른 상품이 이미 이 SKU를 사용하고 있습니다",
+      "productNotFound": "상품을 찾을 수 없습니다",
+      "orderNotFound": "주문을 찾을 수 없습니다",
+      "invalidAction": "알 수 없는 주문 작업입니다",
+      "orderStatusConflict": "현재 상태에서는 이 주문을 변경할 수 없습니다. 새로고침 후 다시 시도하세요.",
+      "invalidStatusFilter": "알 수 없는 상태 필터입니다"
+    }
+  },
+  "Commerce": {
+    "products": {
+      "title": "상품",
+      "description": "상품 카탈로그입니다. AI는 활성 상품만, 정확히 이 가격과 재고로 안내합니다.",
+      "new": "새 상품",
+      "edit": "상품 수정",
+      "delete": "상품 삭제",
+      "hidden": "숨김",
+      "empty": "아직 상품이 없습니다. AI가 판매를 시작하도록 상품을 추가하세요.",
+      "loadError": "상품을 불러오지 못했습니다",
+      "nameRequired": "이름은 필수입니다",
+      "saveError": "상품을 저장하지 못했습니다",
+      "created": "상품이 추가되었습니다",
+      "updated": "상품이 수정되었습니다",
+      "deleteConfirm": "\"{name}\"을(를) 삭제할까요? 이전 주문의 정보는 유지됩니다.",
+      "deleteError": "상품을 삭제하지 못했습니다",
+      "activeLabel": "판매 가능",
+      "activeHint": "숨긴 상품은 AI가 절대 안내하지 않습니다.",
+      "nameLabel": "이름",
+      "namePlaceholder": "예: 앙카라 신발",
+      "descriptionLabel": "설명",
+      "descriptionHint": "AI가 질문에 답하고 상품을 추천할 때 사용합니다.",
+      "priceLabel": "가격 ({currency})",
+      "stockLabel": "재고",
+      "stockHint": "재고를 관리하지 않으면 비워 두세요.",
+      "skuLabel": "SKU (선택)",
+      "cancel": "취소",
+      "save": "저장",
+      "stockUntracked": "재고 관리 안 함",
+      "outOfStock": "품절",
+      "inStock": "재고 {count}개"
+    },
+    "orders": {
+      "title": "주문",
+      "description": "채팅에서 생성된 주문입니다. 은행 계좌를 확인한 후 여기에서 결제 완료로 표시하세요. 결제는 자동으로 확인되지 않습니다.",
+      "filterLabel": "주문 필터",
+      "filters": {
+        "open": "확인 필요",
+        "paid": "결제 완료",
+        "fulfilled": "처리 완료",
+        "cancelled": "취소됨",
+        "all": "전체"
+      },
+      "empty": {
+        "open": "결제를 기다리는 주문이 없습니다.",
+        "paid": "처리를 기다리는 결제 완료 주문이 없습니다.",
+        "fulfilled": "아직 처리 완료된 주문이 없습니다.",
+        "cancelled": "취소된 주문이 없습니다.",
+        "all": "아직 주문이 없습니다."
+      },
+      "loadError": "주문을 불러오지 못했습니다",
+      "actionError": "주문을 업데이트하지 못했습니다",
+      "confirmMarkPaid": "{number}에 대해 은행 계좌로 {total}을(를) 받은 것을 확인하시겠습니까?",
+      "confirmCancel": "주문 {number}을(를) 취소할까요?",
+      "done": {
+        "mark_paid": "{number} 결제 완료로 표시됨",
+        "fulfill": "{number} 처리 완료로 표시됨",
+        "cancel": "{number} 취소됨"
+      },
+      "byAi": "AI가 생성",
+      "receiptReceived": "영수증 수신",
+      "unknownCustomer": "알 수 없는 고객",
+      "openChat": "채팅 열기",
+      "receiptHint": "고객이 결제 영수증을 보냈습니다. 채팅을 열어 확인하고 은행 계좌를 확인한 후 결제 완료로 표시하세요.",
+      "total": "합계",
+      "note": "고객 메모",
+      "cancelOrder": "주문 취소",
+      "markPaid": "결제 완료로 표시",
+      "markFulfilled": "처리 완료로 표시"
+    },
+    "status": {
+      "pending_payment": "결제 대기",
+      "payment_submitted": "영수증 수신",
+      "paid": "결제 완료",
+      "fulfilled": "처리 완료",
+      "cancelled": "취소됨"
     }
   }
 }

@@ -41,7 +41,9 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Profile",
     "menuSettings": "Settings",
-    "menuSignOut": "Sign out"
+    "menuSignOut": "Sign out",
+    "orders": "Orders",
+    "products": "Products"
   },
   "Header": {
     "dashboard": "Dashboard",
@@ -58,7 +60,9 @@
     "defaultAvatar": "Avatar",
     "menuProfile": "Profile",
     "menuSettings": "Settings",
-    "menuSignOut": "Sign out"
+    "menuSignOut": "Sign out",
+    "orders": "Orders",
+    "products": "Products"
   },
   "ModeToggle": {
     "switchMode": "Switch to {mode} mode"
@@ -1783,7 +1787,8 @@
       "fields": "Fields & tags",
       "deals": "Deals & currency",
       "members": "Team members",
-      "api": "API keys"
+      "api": "API keys",
+      "payments": "Payments"
     },
     "groups": {
       "account": "Account",
@@ -2024,6 +2029,23 @@
       "textPlaceholder": "The message text to insert",
       "cancel": "Cancel",
       "save": "Save"
+    },
+    "payments": {
+      "title": "Payments",
+      "description": "Bank details the AI sends to customers after it creates an order. Customers pay by bank transfer and send a receipt; you confirm the payment on the Orders page.",
+      "readOnly": "Only admins and owners can change payment settings.",
+      "bankName": "Bank name",
+      "accountName": "Account name",
+      "accountNumber": "Account number",
+      "instructions": "Extra payment instructions (optional)",
+      "instructionsPlaceholder": "e.g. Use your name as the transfer narration.",
+      "prefix": "Invoice number prefix",
+      "prefixHint": "Up to 12 letters, numbers or dashes. New orders are numbered like INV-0001.",
+      "save": "Save",
+      "saved": "Payment settings saved",
+      "saveError": "Could not save payment settings",
+      "previewTitle": "What customers receive",
+      "previewIncomplete": "Fill in the bank name, account name and account number. Until then, orders are handed to a person to send payment details."
     }
   },
   "SignupPage": {
@@ -2714,6 +2736,99 @@
       "submitFailed": "Failed to submit template.",
       "metaApiStatus": "Meta API error: {status}",
       "syncFailed": "Failed to sync templates"
+    },
+    "commerce": {
+      "invalidBody": "Invalid request body",
+      "nameRequired": "Product name is required",
+      "invalidPrice": "Price must be a number of 0 or more, with at most 2 decimal places",
+      "invalidStock": "Stock must be a whole number of 0 or more, or blank",
+      "nothingToUpdate": "Nothing to update",
+      "invalidAccountNumber": "Account number can only contain letters, numbers, spaces and dashes",
+      "invalidPrefix": "Invoice prefix can be up to 12 letters, numbers or dashes",
+      "skuTaken": "Another product already uses this SKU",
+      "productNotFound": "Product not found",
+      "orderNotFound": "Order not found",
+      "invalidAction": "Unknown order action",
+      "orderStatusConflict": "This order can’t be changed from its current status. Refresh and try again.",
+      "invalidStatusFilter": "Unknown status filter"
+    }
+  },
+  "Commerce": {
+    "products": {
+      "title": "Products",
+      "description": "Your catalog. The AI only quotes active products, with exactly these prices and stock levels.",
+      "new": "New product",
+      "edit": "Edit product",
+      "delete": "Delete product",
+      "hidden": "Hidden",
+      "empty": "No products yet. Add one so the AI can start selling.",
+      "loadError": "Could not load products",
+      "nameRequired": "Name is required",
+      "saveError": "Could not save the product",
+      "created": "Product added",
+      "updated": "Product updated",
+      "deleteConfirm": "Delete \"{name}\"? Past orders keep their details.",
+      "deleteError": "Could not delete the product",
+      "activeLabel": "Available to sell",
+      "activeHint": "Hidden products are never offered by the AI.",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Ankara Shoes",
+      "descriptionLabel": "Description",
+      "descriptionHint": "The AI uses this to answer questions and recommend products.",
+      "priceLabel": "Price ({currency})",
+      "stockLabel": "Stock",
+      "stockHint": "Leave blank if you don’t track stock.",
+      "skuLabel": "SKU (optional)",
+      "cancel": "Cancel",
+      "save": "Save",
+      "stockUntracked": "Stock not tracked",
+      "outOfStock": "Out of stock",
+      "inStock": "{count} in stock"
+    },
+    "orders": {
+      "title": "Orders",
+      "description": "Orders created in chat. Check your bank account, then mark orders paid here — payment is never confirmed automatically.",
+      "filterLabel": "Filter orders",
+      "filters": {
+        "open": "Needs attention",
+        "paid": "Paid",
+        "fulfilled": "Fulfilled",
+        "cancelled": "Cancelled",
+        "all": "All"
+      },
+      "empty": {
+        "open": "Nothing waiting for payment.",
+        "paid": "No paid orders waiting to be fulfilled.",
+        "fulfilled": "No fulfilled orders yet.",
+        "cancelled": "No cancelled orders.",
+        "all": "No orders yet."
+      },
+      "loadError": "Could not load orders",
+      "actionError": "Could not update the order",
+      "confirmMarkPaid": "Confirm you have received {total} in your bank account for {number}?",
+      "confirmCancel": "Cancel order {number}?",
+      "done": {
+        "mark_paid": "{number} marked as paid",
+        "fulfill": "{number} marked as fulfilled",
+        "cancel": "{number} cancelled"
+      },
+      "byAi": "Created by AI",
+      "receiptReceived": "Receipt received",
+      "unknownCustomer": "Unknown customer",
+      "openChat": "Open chat",
+      "receiptHint": "The customer sent a payment receipt. Open the chat to see it, check your bank account, then mark the order paid.",
+      "total": "Total",
+      "note": "Customer note",
+      "cancelOrder": "Cancel order",
+      "markPaid": "Mark paid",
+      "markFulfilled": "Mark fulfilled"
+    },
+    "status": {
+      "pending_payment": "Awaiting payment",
+      "payment_submitted": "Receipt received",
+      "paid": "Paid",
+      "fulfilled": "Fulfilled",
+      "cancelled": "Cancelled"
     }
   }
 }
